@@ -2,6 +2,8 @@
 
 namespace Equinox\Console\Commands;
 
+use Carbon\Carbon;
+use Equinox\Jobs\CreateNewStorage;
 use Illuminate\Console\Command;
 
 class Simulate extends Command
@@ -30,7 +32,7 @@ class Simulate extends Command
 
         switch ($function) {
             case "create":
-
+                $this->simulateCreating();
                 break;
             case "modify":
 
@@ -44,5 +46,12 @@ class Simulate extends Command
         }
     }
 
+    protected function simulateCreating()
+    {
+        $referenceDate = new Carbon();
 
+        $job = new CreateNewStorage($referenceDate);
+
+        dispatch_now($job);
+    }
 }

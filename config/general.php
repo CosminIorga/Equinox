@@ -9,16 +9,16 @@
 return [
 
     /**
-     * The interval stored in the database (in minutes).
+     * The interval stored in the JSON column of a reporting table (in minutes).
      * Allowed options are stored in App\Definitions\Common.php
      */
-    'column_stretch' => 60,
+    'data_elasticity' => 60,
 
     /**
-     * The interval the table should store data.
+     * The interval the reporting table should store data.
      * Allowed options are stored in App\Definitions\Common.php
      */
-    't_stretch' => 'daily',
+    'storage_elasticity' => 'daily',
 
 
     /**
