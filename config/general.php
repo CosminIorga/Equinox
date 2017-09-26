@@ -14,6 +14,7 @@ return [
      */
     'data_elasticity' => 60,
 
+
     /**
      * The interval the reporting table should store data.
      * Allowed options are stored in App\Definitions\Common.php

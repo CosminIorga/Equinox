@@ -36,12 +36,6 @@ abstract class Column implements Arrayable
     protected $meta;
 
     /**
-     * The column value
-     * @var ColumnValue
-     */
-    protected $value;
-
-    /**
      * Array used to decide which class properties can be fetched
      * @var array
      */
@@ -112,18 +106,6 @@ abstract class Column implements Arrayable
     abstract protected function getValidationRules(): array;
 
     /**
-     * Short function used to set the column value
-     * @param ColumnValue $value
-     * @return Column
-     */
-    public function setColumnValue(ColumnValue $value): self
-    {
-        $this->value = $value;
-
-        return $this;
-    }
-
-    /**
      * Magic getter for meta information
      * @param string $property
      * @return mixed
@@ -166,7 +148,6 @@ abstract class Column implements Arrayable
         );
     }
 
-
     /**
      * Get the instance as an array.
      *
@@ -177,7 +158,6 @@ abstract class Column implements Arrayable
         return [
             'type' => $this->getColumnType(),
             'meta' => $this->getColumnMeta(),
-            //'value' => $this->getColumnValue()
         ];
     }
 
@@ -196,13 +176,4 @@ abstract class Column implements Arrayable
         return $this->meta;
     }
 
-    /**
-     * Short function used to get the column value
-     * @return ColumnValue
-     */
-    public function getColumnValue(): ColumnValue
-    {
-        //TODO: add ?? SimpleValue(null)
-        return $this->value;
-    }
 }

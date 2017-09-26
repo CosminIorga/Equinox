@@ -9,7 +9,6 @@
 namespace Equinox\Factories;
 
 
-use Carbon\Carbon;
 use Equinox\Definitions\Storage as StorageDefinitions;
 use Equinox\Exceptions\FactoryException;
 use Equinox\Models\Storage;
@@ -20,16 +19,15 @@ class StorageFactory
 
     /**
      * Column factory builder
-     * @param Carbon $referenceDate
      * @param string $type
      * @return Storage
      * @throws FactoryException
      */
-    public static function build(Carbon $referenceDate, string $type): Storage
+    public static function build(string $type): Storage
     {
         switch($type) {
             case StorageDefinitions::TABLE_ELASTICITY_DAILY:
-                return new Daily($referenceDate);
+                return new Daily();
             default:
                 throw new FactoryException(FactoryException::INVALID_COLUMN_TYPE_RECEIVED, [
                     'type' => $type

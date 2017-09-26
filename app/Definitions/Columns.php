@@ -58,4 +58,12 @@ class Columns
         Columns::PRIMARY_INDEX,
         Columns::NO_INDEX,
     ];
+
+    /**
+     * Timestamps
+     */
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
+    const DELETED_AT = 'deleted_at';
+
 }

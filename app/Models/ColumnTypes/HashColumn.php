@@ -11,6 +11,9 @@ namespace Equinox\Models\ColumnTypes;
 
 use Equinox\Definitions\Columns;
 use Equinox\Models\Column;
+use Equinox\Models\ColumnValue;
+use Equinox\Models\ColumnValueTypes\SimpleValue;
+use Equinox\Services\General\Utils;
 
 class HashColumn extends Column
 {

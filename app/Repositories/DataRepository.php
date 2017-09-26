@@ -31,8 +31,29 @@ class DataRepository extends DefaultRepository
      * @param string $storageName
      * @param \Closure $storageGeneratorClosure
      */
-    public function createStorageWithClosure(string $storageName, \Closure $storageGeneratorClosure)
+    public function createStorageFromClosure(string $storageName, \Closure $storageGeneratorClosure)
     {
         \Schema::create($storageName, $storageGeneratorClosure);
     }
+
+    /**
+     * Function used to create a new storage trigger given the trigger generator function
+     * @param \Closure $storageTriggerClosure
+     */
+    public function createTriggerFromClosure(\Closure $storageTriggerClosure)
+    {
+        $triggerSyntax = $storageTriggerClosure();
+
+        \DB::unprepared($triggerSyntax);
+    }
+
+    /**
+     * Function used to drop a storage if exists
+     * @param string $storageName
+     */
+    public function dropStorageIfExists(string $storageName)
+    {
+        \Schema::dropIfExists($storageName);
+    }
+
 }

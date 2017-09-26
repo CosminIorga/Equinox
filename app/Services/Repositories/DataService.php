@@ -9,10 +9,13 @@
 namespace Equinox\Services\Repositories;
 
 
+use Equinox\Definitions\Columns;
 use Equinox\Models\Column;
-use Equinox\Models\Storage;
+use Equinox\Models\NamedStorage;
+use Equinox\Models\Trigger;
 use Equinox\Repositories\DataRepository;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Collection;
 
 class DataService
 {
@@ -35,22 +38,39 @@ class DataService
 
     /**
      * Function used to generate a new storage
-     * @param Storage $storage
+     * @param NamedStorage $storage
+     * @throws \Exception
      */
-    public function generateStorage(Storage $storage)
+    public function generateStorage(NamedStorage $storage)
     {
-        $storageName = $storage->getStorageName();
-        $storageGeneratorClosure = $this->createStorageGenerator($storage);
+        /* Create storage */
+        $this->dataRepository->createStorageFromClosure(
+            $storage->getStorageName(),
+            $this->createStorageGenerator($storage)
+        );
 
-        $this->dataRepository->createStorageWithClosure($storageName, $storageGeneratorClosure);
+        try {
+            /* Add storage triggers */
+            $storage->triggers->each(function (Trigger $trigger) {
+                $this->dataRepository->createTriggerFromClosure(
+                    $this->createTriggerGenerator($trigger)
+                );
+            });
+
+        } catch (\Exception $exception) {
+            $this->dataRepository->dropStorageIfExists($storage->getStorageName());
+
+            throw $exception;
+        }
+
     }
 
     /**
      * Function used to return another function that creates the storage
-     * @param Storage $storage
+     * @param NamedStorage $storage
      * @return \Closure
      */
-    protected function createStorageGenerator(Storage $storage): \Closure
+    protected function createStorageGenerator(NamedStorage $storage): \Closure
     {
         return function (Blueprint $table) use ($storage) {
             /* Set table engine */
@@ -76,16 +96,50 @@ class DataService
 
             /* Add timestamp columns such as created_at, updated_at and deleted_at*/
             /* @noinspection PhpUndefinedMethodInspection */
-            $table->timestamp('created_at')
+            $table->timestamp(Columns::CREATED_AT)
                 ->nullable()
                 ->default(\DB::raw('CURRENT_TIMESTAMP'));
             /* @noinspection PhpUndefinedMethodInspection */
-            $table->timestamp('updated_at')
+            $table->timestamp(Columns::UPDATED_AT)
                 ->nullable()
                 ->default(\DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
             /* @noinspection PhpUndefinedMethodInspection */
-            $table->timestamp('deleted_at')->nullable();
+            $table->timestamp(Columns::DELETED_AT)
+                ->nullable();
         };
+    }
+
+    /**
+     * Function used to return the generator function for storage triggers
+     * @param Trigger $trigger
+     * @return \Closure
+     */
+    protected function createTriggerGenerator(Trigger $trigger): \Closure
+    {
+        return function () use ($trigger) {
+            $triggerSyntax = "CREATE TRIGGER %1\$s
+            %2\$s ON %3\$s
+            FOR EACH ROW
+            BEGIN
+                %4\$s
+            END;";
+
+            return sprintf(
+                $triggerSyntax,
+                $trigger->triggerName,
+                $trigger->triggerType,
+                $trigger->storageName,
+                $trigger->triggerDefinition
+            );
+        };
+    }
+
+
+    public function modifyStorageData(string $operation, Collection $records): bool
+    {
+
+
+
     }
 
 }

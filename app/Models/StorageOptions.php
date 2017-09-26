@@ -8,17 +8,14 @@
 
 namespace Equinox\Models;
 
-use Equinox\Exceptions\StorageOptionsException;
-
 /**
  * Class StorageOptions
  * @package Equinox\Models
- * @property bool $columnsFlag
- * @property bool $triggersFlag
  * @property string $storageType
  */
-class StorageOptions
+class StorageOptions extends NonPersistentModel
 {
+
     /**
      * The storage type
      * @var string
@@ -26,43 +23,26 @@ class StorageOptions
     protected $_storageType;
 
     /**
-     * Flag indicating whether storage columns should be generated
-     * @var bool
+     * Array used to decide which class properties can be set
+     * @var array
      */
-    protected $_columnsFlag;
+    protected $settable = [];
 
     /**
-     * Flag indicating whether storage triggers should be generated
-     * @var bool
+     * Array used to decide which class properties can be fetched
+     * @var array
      */
-    protected $_triggersFlag;
+    protected $gettable = [
+        'storageType',
+    ];
 
     /**
      * StorageOptions constructor.
      * @param string $storageType
-     * @param bool $columnsFlag
-     * @param bool $triggersFlag
      */
-    public function __construct(string $storageType, bool $columnsFlag, bool $triggersFlag)
+    public function __construct(string $storageType)
     {
         $this->_storageType = $storageType;
-        $this->_columnsFlag = $columnsFlag;
-        $this->_triggersFlag = $triggersFlag;
-    }
-
-    /**
-     * Magic method used to return flag option
-     * @param string $option
-     * @return mixed
-     * @throws StorageOptionsException
-     */
-    public function __get(string $option)
-    {
-        if (!property_exists($this, "_{$option}")) {
-            throw new StorageOptionsException(StorageOptionsException::OPTION_NOT_FOUND);
-        }
-
-        return $this->{"_{$option}"};
     }
 
 }

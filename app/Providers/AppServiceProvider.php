@@ -3,8 +3,9 @@
 namespace Equinox\Providers;
 
 use Equinox\Repositories\DataRepository;
-use Equinox\Services\General\StorageService;
 use Equinox\Services\Repositories\DataService;
+use Equinox\Services\Structure\RecordService;
+use Equinox\Services\Structure\StorageService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -32,6 +33,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(StorageService::class, function () {
             return new StorageService();
+        });
+
+        $this->app->bind(RecordService::class, function () {
+            return new RecordService();
         });
     }
 }

@@ -9,10 +9,10 @@
 namespace Equinox\Exceptions;
 
 
-class StorageOptionsException extends DefaultException
+class StorageException extends DefaultException
 {
 
-    const OPTION_NOT_FOUND = 'Option not found';
+    const STORAGE_CANNOT_PROCESS_SUCH_DATE = 'Storage cannot process given reference date';
 
     /**
      * Function should be implemented by all children exceptions

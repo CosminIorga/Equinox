@@ -9,6 +9,10 @@ use Equinox\Models\Column;
 use Equinox\Models\Storage;
 use Illuminate\Support\Collection;
 
+/**
+ * Class GenerateColumns
+ * @package Equinox\Jobs
+ */
 class GenerateColumns extends DefaultJob
 {
     /**
@@ -82,47 +86,17 @@ class GenerateColumns extends DefaultJob
      */
     protected function computeIntervalColumns(): self
     {
-        $intervalPatternName = config('columns.storage_columns.interval_column_template.name_pattern');
-
         $intervalColumnCount = $this->storage->getIntervalColumnCount();
 
-        foreach (range(1, $intervalColumnCount) as $columnIndex) {
-            $intervalColumnName = $this->replaceInPattern(
-                $intervalPatternName,
-                $this->storage->getValueForCoordinate($columnIndex - 1),
-                $this->storage->getValueForCoordinate($columnIndex)
-            );
-
+        foreach (range(0, $intervalColumnCount - 1) as $columnIndex) {
             $intervalColumn = ColumnFactory::build([
-                'name' => $intervalColumnName,
+                'name' => $this->storage->getIntervalColumnNameByIndex($columnIndex),
             ], Columns::INTERVAL_COLUMN);
 
             $this->storeColumn($intervalColumn);
         }
 
         return $this;
-    }
-
-    /**
-     * Function used to replace the two coordinates in intervalPattern
-     * @param string $pattern
-     * @param string $replace1
-     * @param string $replace2
-     * @return string
-     */
-    protected function replaceInPattern(string $pattern, string $replace1, string $replace2): string
-    {
-        return str_replace(
-            [
-                ':start_interval:',
-                ':end_interval:',
-            ],
-            [
-                $replace1,
-                $replace2,
-            ],
-            $pattern
-        );
     }
 
     /**

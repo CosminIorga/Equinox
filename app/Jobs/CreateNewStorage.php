@@ -4,11 +4,14 @@ namespace Equinox\Jobs;
 
 
 use Carbon\Carbon;
-use Equinox\Models\Storage;
-use Equinox\Models\StorageOptions;
-use Equinox\Services\General\StorageService;
+use Equinox\Models\NamedStorage;
 use Equinox\Services\Repositories\DataService;
+use Equinox\Services\Structure\StorageService;
 
+/**
+ * Class CreateNewStorage
+ * @package Equinox\Jobs
+ */
 class CreateNewStorage extends DefaultJob
 {
     /**
@@ -18,16 +21,16 @@ class CreateNewStorage extends DefaultJob
     protected $referenceDate;
 
     /**
-     * The storage options
-     * @var StorageOptions
+     * The storage type
+     * @var string
      */
-    protected $storageOptions;
+    protected $storageType;
 
     /**
-     * The storage model
-     * @var Storage
+     * The named storage model
+     * @var NamedStorage
      */
-    protected $storage;
+    protected $namedStorage;
 
     /**
      * The data service
@@ -44,10 +47,12 @@ class CreateNewStorage extends DefaultJob
     /**
      * CreateNewStorage constructor.
      * @param Carbon $referenceDate
+     * @param string $storageType
      */
-    public function __construct(Carbon $referenceDate)
+    public function __construct(Carbon $referenceDate, string $storageType)
     {
         $this->referenceDate = $referenceDate;
+        $this->storageType = $storageType;
     }
 
     /**
@@ -62,48 +67,51 @@ class CreateNewStorage extends DefaultJob
         $this->dataService = $dataService;
         $this->storageService = $storageService;
 
-        $this->computeStorageOptions()
-            ->computeStorage()
+        /* Start timer for performance benchmarks */
+        $startTime = microtime(true);
+
+        $this->initStorage()
+            ->generateStorageTriggers()
             ->persist();
+
+        /* Compute total operations time */
+        $endTime = microtime(true);
+        $elapsed = $endTime - $startTime;
+
+        echo "CREATED: $elapsed" . PHP_EOL;
     }
 
     /**
-     * Function used to compute the storage options used to build the storage
+     * Short function used to set various storage fields
      * @return CreateNewStorage
      */
-    protected function computeStorageOptions(): self
+    protected function initStorage(): self
     {
-        $this->storageOptions = new StorageOptions(
-            config('general.storage_elasticity'),
-            true,
-            true
-        );
+        $storage = $this->storageService->createStorageByType($this->storageType);
+
+        $this->namedStorage = $this->storageService->createNamedStorage($storage, $this->referenceDate);
 
         return $this;
     }
 
     /**
-     * Function used to initialize a Storage Model
+     * Short function used to generate the storage triggers
      * @return CreateNewStorage
      */
-    protected function computeStorage(): self
+    protected function generateStorageTriggers(): self
     {
-        $this->storage = $this->storageService->computeNewStorage(
-            $this->referenceDate,
-            $this->storageOptions
-        );
+        $this->storageService->computeStorageTriggers($this->namedStorage);
 
         return $this;
     }
 
-
     /**
-     * Function used to save the storage model
+     * Function used to save the Storage Model
      * @return CreateNewStorage
      */
     protected function persist(): self
     {
-        $this->dataService->generateStorage($this->storage);
+        $this->dataService->generateStorage($this->namedStorage);
 
         return $this;
     }

@@ -13,6 +13,8 @@ class ColumnException extends DefaultException
 {
 
     const VALIDATION_FAILED = 'Validation failed.';
+    const UNDEFINED_COLUMN = 'Undefined column';
+    const INVALID_CONFIG_FUNCTION_RECEIVED = 'Invalid config function received';
 
     /**
      * Function should be implemented by all children exceptions

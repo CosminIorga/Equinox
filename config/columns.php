@@ -35,21 +35,21 @@ return [
          * All pivot columns will be used in a unique index as to better enforce the reporting algorithm
          */
         'pivot_columns' => [
-            [
+            'client' => [
                 'name' => 'client',
                 'data_type' => 'string',
                 'length' => 255,
                 #index is assumed simple_index
                 #allow_null is assumed false
             ],
-            [
+            'carrier' => [
                 'name' => 'carrier',
                 'data_type' => 'string',
                 'length' => 255,
                 #index is assumed simple_index
                 #allow_null is assumed false
             ],
-            [
+            'destination' => [
                 'name' => 'destination',
                 'data_type' => 'string',
                 'length' => 255,
@@ -62,26 +62,64 @@ return [
          * Interval column contains only template values as interval column count depends on the storage config
          */
         'interval_column_template' => [
-            'name_pattern' => 'interval_:start_interval:_:end_interval:'
+            #name_pattern is assumed 'interval_:start_interval:_:end_interval:'
             #data_type is assumed JSON
             #index is assumed null
             #allow_null is assumed true
         ],
 
+    ],
+
+    /**
+     * Here resides information regarding the raw input data that needs to be inserted
+     */
+    'input_output_data' => [
+        /**
+         * Timestamp key is used to compute the storage and interval needed
+         */
+        'timestamp_key' => [
+            'input_name' => 'start_date',
+        ],
+
+        /**
+         * Pivot keys ... TODO: Explain
+         */
+        'pivot_keys' => [
+            'client' => [
+                'input_name' => 'client',
+                'output_name' => 'client',
+            ],
+            'carrier' => [
+                'input_name' => 'carrier',
+                'output_name' => 'carrier',
+            ],
+            'destination' => [
+                'input_name' => 'destination',
+                'output_name' => 'destination',
+            ],
+        ],
+
+        /**
+         * Hash key ... TODO: Explain
+         */
+        'hash_key' => [
+            'output_name' => 'hash_id',
+        ],
+
         /**
          * Interval column aggregates contain information regarding the data that will be stored in interval columns
          * Each aggregate is represented as a key => value pair as follows:
-         *      key => the name under which data is stored in the interval column
-         *      value => an array containing following:
-         *          input_name =>
-         *          input_function => function to apply to input_name
-         *          output_functions => array containing available operations on the key
-         *          extra => output formatting options such as:
-         *              round => round output to X decimals
+         *      input_name => from which key should it fetch the data
+         *      aggregate_key => in which key it should place the parsed data
+         *      input_function => function to apply to input_name
+         *      output_functions => array containing available operations on the key
+         *      extra => output formatting options such as:
+         *          round => round output to X decimals
          */
         'interval_column_aggregates' => [
             'interval_duration' => [
                 'input_name' => 'duration',
+                'aggregate_key' => 'interval_duration',
                 'input_function' => 'sum',
                 'output_functions' => [
                     'sum',
@@ -94,6 +132,7 @@ return [
             ],
             'interval_cost' => [
                 'input_name' => 'cost',
+                'aggregate_key' => 'interval_cost',
                 'input_function' => 'sum',
                 'output_functions' => [
                     'sum',
@@ -106,6 +145,7 @@ return [
             ],
             'interval_records' => [
                 'input_name' => null,
+                'aggregate_key' => 'interval_records',
                 'input_function' => 'count',
                 'output_functions' => [
                     'sum',
@@ -115,6 +155,7 @@ return [
             ],
             'interval_full_records' => [
                 'input_name' => 'is_full_record',
+                'aggregate_key' => 'interval_full_records',
                 'input_function' => 'count',
                 'output_functions' => [
                     'sum',
@@ -128,23 +169,13 @@ return [
         'interval_column_meta_aggregates' => [
             'meta_record_count' => [
                 'input_name' => null,
+                'aggregate_key' => 'meta_record_count',
                 'input_function' => 'count',
                 'output_functions' => [
                     'sum',
                 ],
             ],
-        ]
-    ],
+        ],
 
-    /**
-     * Here resides information regarding the raw input data that needs to be inserted
-     */
-    'input_data' => [
-        /**
-         * Timestamp key is used to compute the storage and interval needed
-         */
-        'timestamp_key' => [
-            'name' => 'start_date'
-        ]
     ],
 ];
