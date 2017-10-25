@@ -11,5 +11,4 @@ abstract class DefaultJob
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-
 }

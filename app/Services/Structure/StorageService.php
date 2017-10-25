@@ -11,8 +11,8 @@ namespace Equinox\Services\Structure;
 
 use Carbon\Carbon;
 use Equinox\Factories\StorageFactory;
-use Equinox\Jobs\GenerateColumns;
-use Equinox\Jobs\GenerateTriggers;
+use Equinox\Jobs\CreateStorage\GenerateColumns;
+use Equinox\Jobs\CreateStorage\GenerateTriggers;
 use Equinox\Models\NamedStorage;
 use Equinox\Models\Storage;
 

@@ -9,7 +9,9 @@
 namespace Equinox\Services\Structure;
 
 
-use Equinox\Helpers\IntervalColumnHelper;
+use Equinox\Definitions\Data;
+use Equinox\Exceptions\ColumnException;
+use Equinox\Exceptions\DataException;
 use Equinox\Models\Column;
 use Equinox\Models\NamedStorage;
 use Equinox\Models\Record;
@@ -20,7 +22,27 @@ use Illuminate\Support\Collection;
 class RecordService
 {
 
-    use IntervalColumnHelper;
+    /**
+     * Array containing config information
+     * @var array
+     */
+    protected $configInfo;
+
+    /**
+     * RecordService constructor.
+     */
+    public function __construct()
+    {
+        $this->configInfo = [
+            'pivotsConfig' => config('columns.input_output_data.pivot_keys'),
+            'hashOutputName' => config('columns.input_output_data.hash_key.output_name'),
+            'intervalAggregatesConfig' => array_merge(
+                config('columns.input_output_data.interval_column_aggregates'),
+                config('columns.input_output_data.interval_column_meta_aggregates')
+            ),
+        ];
+    }
+
 
     /**
      * Function used to create
@@ -59,11 +81,12 @@ class RecordService
      * @param NamedStorage $storage
      * @param Record $outputRecord
      * @param array $inputRecord
+     * @param string $operation
      */
-    public function fillRecord(NamedStorage $storage, Record $outputRecord, array $inputRecord)
+    public function fillRecord(NamedStorage $storage, Record $outputRecord, array $inputRecord, string $operation)
     {
         $this->computeHashAndPivotValues($outputRecord, $inputRecord)
-            ->computeIntervalValues($storage, $outputRecord, $inputRecord);
+            ->computeIntervalValues($outputRecord, $inputRecord, $operation, $storage);
     }
 
     /**
@@ -74,12 +97,9 @@ class RecordService
      */
     protected function computeHashAndPivotValues(Record $outputRecord, array $inputRecord): self
     {
-        $pivotsConfig = config('columns.input_output_data.pivot_keys');
-        $hashOutputName = config('columns.input_output_data.hash_key.output_name');
-
         $hashValues = [];
 
-        foreach ($pivotsConfig as $pivotConfig) {
+        foreach ($this->configInfo['pivotsConfig'] as $pivotConfig) {
             $columnName = $pivotConfig['output_name'];
             $columnValue = $inputRecord[$pivotConfig['input_name']];
 
@@ -95,28 +115,32 @@ class RecordService
 
         $hash = Utils::hashFromArray($hashValues);
 
-        $outputRecord->setValueForColumn($hashOutputName, $hash);
+        $outputRecord->setValueForColumn($this->configInfo['hashOutputName'], $hash);
+        $outputRecord->hash = $hash;
 
         return $this;
     }
 
     /**
      * Function used to compute the interval column values
-     * @param NamedStorage $storage
      * @param Record $outputRecord
      * @param array $inputRecord
+     * @param string $operation
+     * @param NamedStorage $storage
      * @return RecordService
      */
-    protected function computeIntervalValues(NamedStorage $storage, Record $outputRecord, array $inputRecord): self
-    {
-        $intervalAggregatesConfig = $this->getAggregatesConfig();
-
+    protected function computeIntervalValues(
+        Record $outputRecord,
+        array $inputRecord,
+        string $operation,
+        NamedStorage $storage
+    ): self {
         $intervalColumnName = $storage->getIntervalColumnNameByReferenceDate();
 
         $values = collect([]);
 
-        foreach ($intervalAggregatesConfig as $config) {
-            $value = $this->extractValueFromInputRecord($inputRecord, $config);
+        foreach ($this->configInfo['intervalAggregatesConfig'] as $config) {
+            $value = $this->extractValueFromInputRecord($inputRecord, $config, $operation);
             $aggregateKey = $config['aggregate_key'];
 
             $values->put($aggregateKey, $value);
@@ -125,5 +149,67 @@ class RecordService
         $outputRecord->setValueForColumn($intervalColumnName, $values->toJson());
 
         return $this;
+    }
+
+    /**
+     * Function used to extract the value from given record
+     * @param array $record
+     * @param array $aggregateConfig
+     * @param string $operation
+     * @return float|int|null
+     * @throws ColumnException
+     */
+    protected function extractValueFromInputRecord(array $record, array $aggregateConfig, string $operation)
+    {
+        $inputKey = $aggregateConfig['input_name'];
+        $inputFunction = $aggregateConfig['input_function'];
+
+        $sign = $this->getSignByOperation($operation);
+
+        switch ($inputFunction) {
+            case 'sum':
+                /* Return 0 if value does not exist in given record */
+                if (!array_key_exists($inputKey, $record)) {
+                    return null;
+                }
+
+                /* Otherwise return the value from the record */
+
+                return $sign * floatval($record[$inputKey]);
+            case 'count':
+                /* Always return one unit if input_name is null */
+                if (is_null($inputKey)) {
+                    return $sign * 1;
+                }
+
+                /* Otherwise evaluate column and check if value is considered non-zero */
+
+                return $sign * intval(boolval($record[$inputKey]));
+            default:
+                throw new ColumnException(
+                    ColumnException::INVALID_CONFIG_FUNCTION_RECEIVED,
+                    $aggregateConfig
+                );
+        }
+    }
+
+    /**
+     * Short function used to return value sign by given operation
+     * @param string $operation
+     * @return int
+     * @throws DataException
+     */
+    protected function getSignByOperation(string $operation): int
+    {
+        switch ($operation) {
+            case Data::INSERT_OPERATION:
+                return 1;
+            case Data::DELETE_OPERATION:
+                return -1;
+            default:
+                throw new DataException(DataException::INVALID_OPERATION_RECEIVED, [
+                    'Operation' => $operation,
+                ]);
+        }
     }
 }

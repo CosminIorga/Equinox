@@ -11,10 +11,12 @@ namespace Equinox\Models\ColumnTypes;
 
 use Equinox\Definitions\Columns;
 use Equinox\Models\Column;
-use Equinox\Models\ColumnValue;
-use Equinox\Models\ColumnValueTypes\SimpleValue;
 use Illuminate\Validation\Rule;
 
+/**
+ * Class PivotColumn
+ * @package Equinox\Models\ColumnTypes
+ */
 class PivotColumn extends Column
 {
 

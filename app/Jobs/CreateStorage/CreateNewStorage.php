@@ -1,9 +1,10 @@
 <?php
 
-namespace Equinox\Jobs;
+namespace Equinox\Jobs\CreateStorage;
 
 
 use Carbon\Carbon;
+use Equinox\Jobs\DefaultJob;
 use Equinox\Models\NamedStorage;
 use Equinox\Services\Repositories\DataService;
 use Equinox\Services\Structure\StorageService;

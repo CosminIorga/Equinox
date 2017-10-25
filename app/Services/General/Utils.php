@@ -23,6 +23,26 @@ class Utils
     }
 
     /**
+     * Short function used escape a string
+     * @param string $string
+     * @return string
+     */
+    static public function escapeValue(string $string): string
+    {
+        return addslashes($string);
+    }
+
+    /**
+     * Short function used to replace double quotes with single quotes
+     * @param string $string
+     * @return string
+     */
+    static public function replaceQuotes(string $string): string
+    {
+        return str_replace('"', "'", $string);
+    }
+
+    /**
      * Shprt function used to return a hash value given an array
      * @param array $values
      * @return string
@@ -89,6 +109,11 @@ class Utils
      */
     static public function dumpMemUsage()
     {
+        /* Do not dump memory usage if not on debug environment */
+        if (!env('APP_DEBUG')) {
+            return;
+        }
+
         $usage = memory_get_usage();
         $peak = memory_get_peak_usage();
 
@@ -101,5 +126,38 @@ class Utils
         }
 
         dump(str_repeat("#", 15));
+    }
+
+    /**
+     * Start timer for performance benchmarks
+     * @return float
+     */
+    static public function startTimer(): float
+    {
+        return microtime(true);
+    }
+
+    /**
+     * Compute total operations time
+     * @param float $startTime
+     * @return float
+     */
+    static public function endTimer(float $startTime): float
+    {
+        return microtime(true) - $startTime;
+    }
+
+    /**
+     * Dump debug message
+     * @param string $message
+     */
+    static public function dumpMessage(string $message)
+    {
+        /* Do not dump message if not on debug environment */
+        if (!env('APP_DEBUG')) {
+            return;
+        }
+
+        dump($message);
     }
 }

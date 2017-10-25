@@ -63,8 +63,6 @@ class Trigger extends NonPersistentModel
         'triggerDefinition',
     ];
 
-
-
     /**
      * Trigger constructor.
      * @param string $storageName

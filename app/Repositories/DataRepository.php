@@ -25,7 +25,6 @@ class DataRepository extends DefaultRepository
         return \DB::table($tableName);
     }
 
-
     /**
      * Function used to create a new storage given the storage name and storage generator function
      * @param string $storageName
@@ -56,4 +55,10 @@ class DataRepository extends DefaultRepository
         \Schema::dropIfExists($storageName);
     }
 
+
+    public function modifyDataFromFile()
+    {
+
+
+    }
 }

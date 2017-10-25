@@ -1,10 +1,11 @@
 <?php
 
-namespace Equinox\Jobs;
+namespace Equinox\Jobs\CreateStorage;
 
 
 use Equinox\Definitions\Columns;
 use Equinox\Factories\ColumnFactory;
+use Equinox\Jobs\DefaultJob;
 use Equinox\Models\Column;
 use Equinox\Models\Storage;
 use Illuminate\Support\Collection;

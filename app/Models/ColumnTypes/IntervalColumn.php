@@ -9,18 +9,15 @@
 namespace Equinox\Models\ColumnTypes;
 
 
-use Carbon\Carbon;
 use Equinox\Definitions\Columns;
-use Equinox\Helpers\IntervalColumnHelper;
 use Equinox\Models\Column;
-use Equinox\Models\ColumnValue;
-use Equinox\Models\ColumnValueTypes\AggregateValue;
-use Equinox\Models\ColumnValueTypes\EmptyValue;
 
+/**
+ * Class IntervalColumn
+ * @package Equinox\Models\ColumnTypes
+ */
 class IntervalColumn extends Column
 {
-
-    use IntervalColumnHelper;
 
     /**
      * Function used to return the default values that should be merged with current ones

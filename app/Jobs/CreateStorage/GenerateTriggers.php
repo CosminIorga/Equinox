@@ -6,11 +6,12 @@
  * Time: 16:30
  */
 
-namespace Equinox\Jobs;
+namespace Equinox\Jobs\CreateStorage;
 
 
 use Equinox\Definitions\Columns;
 use Equinox\Definitions\Storage as StorageDefinitions;
+use Equinox\Jobs\DefaultJob;
 use Equinox\Models\Column;
 use Equinox\Models\NamedStorage;
 use Equinox\Models\Trigger;

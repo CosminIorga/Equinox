@@ -34,5 +34,10 @@ return [
      * Allowed options are any integer value between 1 (1 minute) and 1440 (24 hours) or false.
      * Numeric values represent the interval between each batch processing in minutes.
      */
-    'batch_processing' => false,
+    'batch_processing' => 1000,
+
+    /**
+     * How many records to modify at a time
+     */
+    'batch_database_records' => 500
 ];
